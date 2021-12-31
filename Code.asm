@@ -1,4 +1,5 @@
 .386
+INCLUDE Irvine32.inc
 .MODELSMALL
 .DATA
 
@@ -9,6 +10,8 @@ v0 dd ?
 v1 dd ?
 delta dd 9e3779b9h ;constant
 key dd 4 DUP(0)
+
+splitOut db 8 DUP(0), 0
 
 
 .CODE
@@ -54,3 +57,38 @@ encrypt procedure
     ret
 
 encrypt ENDP
+
+split PROC
+
+     ;splitting first 4 chars
+    mov eax, values[0]
+
+    lea ebx, splitOut ; ebx = offset splitOut
+    mov ecx, 2 ;counter of outerloop
+    splitOuterLoop:
+        
+        mov edx, ecx ;storing the counter of outerloop in edx
+
+        mov ecx, 2 ;setting counter of inner loop
+  
+        splitInnerLoop:
+
+                mov [ebx], al
+                inc ebx
+
+                mov [ebx], ah
+                inc ebx
+
+                shr eax, 16
+
+        LOOP splitInnerLoop
+
+        ;splitting second 4 chars
+        mov eax, values[4]
+
+        mov ecx, edx ;putting the counter of outer loop back in ecx
+    LOOP splitOuterLoop
+
+    ret
+
+split ENDP
