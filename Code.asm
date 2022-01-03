@@ -16,7 +16,7 @@ splitOut db 8 DUP(0), 0
 
 .CODE
 
-encrypt procedure
+enc procedure
     mov sum, 0
     mov eax, [values]
     mov v0, eax
@@ -55,7 +55,7 @@ encrypt procedure
     mov [values+4] , eax
 
     ret
-encrypt ENDP
+enc ENDP
 
 split PROC
 
