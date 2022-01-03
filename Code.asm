@@ -3,7 +3,15 @@ INCLUDE Irvine32.inc
 .MODELSMALL
 .DATA
 
+string DWORD 
+ENC_string DWORD 
+DELTA DWORD 9e3779b9H
+SUM DWORD 0
 
+KEY_0 DWORD 20   ; Key
+KEY_1 DWORD 3
+KEY_2 DWORD 50
+KEY_3 DWORD 100
 sum dd 0
 values dd 2 DUP(0)
 v0 dd ?
@@ -57,6 +65,64 @@ enc procedure
 
     ret
 enc ENDP
+;decrybtion function
+MOV ESI, OFFSET ENC_string     ; ESI is pointing at the beginig of the encrypted message
+MOV EDX, OFFSET ENC_string	; EDX = Begining of ENC_string
+ADD EDX, ENC_string		; EDX = MSG_ENC + 4*(Length)
+SUB EDX, 8                      ; EDX = MSG_ENC + 4*(Length - 2) "end of string"
+MESSAGE_LOOP:
+    MOV ECX, 32 
+    MOV SUM, 0C6EF3720H
+DECRYPTION_LOOP:     ; Calculating V[1]  
+        MOV EAX, [ESI]              ; EAX = V[0]
+        SHL EAX, 4                  ; EAX = (V[0]<<4)
+        ADD EAX, KEY_2              ; EAX = (V[0]<<4 + KEY[2])
+        MOV EBX, [ESI]              ; EBX = V[0]
+        ADD EBX, SUM                ; EBX = V[0] + sum
+        XOR EAX, EBX                ; EAX = (V[0]<<4 + KEY[2]) ^ (V[0] + sum)
+        MOV EBX, [ESI]              ; EBX = V[0]
+        SHR EBX, 5                  ; EBX = V[0]>>5
+        ADD EBX, KEY_3              ; EBX = V[0]>>5 + KEY[3]
+        XOR EAX, EBX                ; EAX = (V[0]<<4 + KEY[2]) ^ (V[0] + sum) ^ (V[0]>>5 + KEY[3])
+        SUB [ESI+4], EAX            ; V[1] -= (V[0]<<4 + KEY[2]) ^ (V[0] + sum) ^ (V[0]>>5 + KEY[3])
+
+; Calculating V[0]
+        MOV EAX, [ESI+4]            ; EAX = V[1]
+        SHL EAX, 4                  ; EAX = (V[1]<<4)
+        ADD EAX, KEY_0              ; EAX = (V[1]<<4 + KEY[0])
+        MOV EBX, [ESI+4]            ; EBX = V[1]
+        ADD EBX, SUM                ; EBX = V[1] + sum
+        XOR EAX, EBX                ; EAX = (V[1]<<4 + KEY[0]) ^ (V[1] + sum)
+        MOV EBX, [ESI+4]            ; EBX = V[1]
+        SHR EBX, 5                  ; EBX = V[1]>>5
+        ADD EBX, KEY_1              ; EBX = V[1]>>5 + KEY[1]
+        XOR EAX, EBX                ; EAX = (V[1]<<4 + KEY[0]) ^ (V[1] + sum) ^ (V[1]>>5 + KEY[1])
+        SUB [ESI], EAX              ; V[0] -= (V[1]<<4 + KEY[0]) ^ (V[1] + sum) ^ V[1]>>5 + KEY[1])
+
+        MOV EBX, DELTA              ; EBX =  0x9e3779b9
+        SUB SUM, EBX                ; SUM -= 0x9e3779b9
+
+    LOOP DECRYPTION_LOOP
+
+CMP ESI, EDX			; If ESI is at The End of MSG_ENC Then leave
+	JZ OUT_OF_LOOP
+    ADD ESI, 8                 ; else
+
+JMP MESSAGE_LOOP                  ; return to begining
+
+; Copy The Encrypted Message into The Real Message
+
+MOV EAX, ENC_string_LEN
+SHR EAX, 2
+MOV ECX, EAX
+MOV EBX, 0
+MOV EDX, 0
+COPY_LOOP:
+    MOV EAX, ENC_string[EDX] 
+	MOV MSG[EBX], AL
+	ADD EBX, 1
+	ADD EDX, 4
+LOOP COPY_LOOP
 
 split PROC
 
