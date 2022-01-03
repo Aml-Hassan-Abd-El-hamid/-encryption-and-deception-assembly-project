@@ -13,6 +13,7 @@ key dd 4 DUP(0)
 
 splitOut db 8 DUP(0), 0
 
+turn db 8 DUP(0),0
 
 .CODE
 
@@ -91,4 +92,48 @@ split PROC
     ret
 split ENDP
 
+combine PROC 
 
+movzx edx, [turn+0] 
+
+mov eax, 0
+mov al, [turn+1]
+shl eax, 8 
+
+or edx, eax 
+
+mov eax, 0
+mov al, [turn+2]
+shl eax, 16 
+
+or edx, eax 
+
+mov eax, 0
+mov al, [turn+3]
+shl eax, 24 
+
+or edx, eax
+mov [values+0], edx 
+
+movzx edx, [turn+4] 
+
+mov eax, 0
+mov al, [turn+5]
+shl eax, 8 
+
+or edx, eax
+mov eax, 0
+mov al, [turn+6]
+shl eax, 16 
+
+or edx, eax 
+
+mov eax, 0
+mov al, [turn+7]
+shl eax, 24 
+
+or edx, eax
+mov [values+4], edx 
+
+ret
+combine ENDP
