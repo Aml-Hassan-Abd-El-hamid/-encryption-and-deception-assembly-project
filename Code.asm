@@ -55,7 +55,6 @@ encrypt procedure
     mov [values+4] , eax
 
     ret
-
 encrypt ENDP
 
 split PROC
