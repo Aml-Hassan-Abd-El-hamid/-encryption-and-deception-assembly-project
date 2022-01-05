@@ -1,6 +1,3 @@
-.386
-INCLUDE Irvine32.inc
-.MODELSMALL
 .DATA
 
 string DWORD 
@@ -25,46 +22,86 @@ turn db 8 DUP(0),0
 
 .CODE
 
-enc procedure
+encrypt PROC
+    
     mov sum, 0
-    mov eax, [values]
-    mov v0, eax
-    mov eax, [values+4]
-    mov v1, eax
-    mov ecx, 32
+    
+    mov cx, 32
+
     encryptLoop:
-        mov eax, delta
-        add sum ,eax
-        mov eax, v1
-        shl eax, 4
-        add eax, [key] ; eax =(v1 << 4) + key[0])
-        mov ebx, v1
-        add ebx, sum ; ebx = (v1 + sum)
-        xor eax, ebx ; eax = (v1 << 4) + key[0]) ^ (v1 + sum)
-        mov ebx, v1
-        shr ebx, 5  ;ebx = (v1 >> 5)
-        add ebx, [key+4]    ;ebx =(v1 >> 5) + key[1]
-        xor eax, ebx  ; eax = ((v1 << 4) + key[0]) ^ (v1 + sum) ^ ((v1 >> 5) + key[1])
-        add v0, eax ;v0 += ((v1 << 4) + key[0]) ^ (v1 + sum) ^ ((v1 >> 5) + key[1])
-        mov eax, v0
-        shl eax, 4
-        add eax, [key+8] ; eax =(v0 << 4) + key[2])
-        mov ebx, v0
-        add ebx, sum ; ebx = (v0 + sum)
-        xor eax, ebx ; eax = (v0 << 4) + key[2]) ^ (v0 + sum)
-        mov ebx, v0
-        shr ebx, 5  ;ebx = (v0 >> 5)
-        add ebx, [key+12]    ;ebx =(v0 >> 5) + key[3]
-        xor eax, ebx  ; eax = ((v0 << 4) + key[2]) ^ (v0 + sum) ^ ((v0 >> 5) + key[3])
-        add v1, eax ;v1 += ((v0 << 4) + key[2]) ^ (v0 + sum) ^ ((v0 >> 5) + key[3])
+    
+        ;sum+=delta
+        mov ax, delta
+        add sum ,ax
+        
+        ;(v1<<4)+k0
+        mov ax, v1
+        shl ax, 4
+        add ax, k0
+        
+        ;v1+sum 
+        mov bx, v1
+        add bx, sum 
+        
+        xor ax, bx 
+        
+        ;(v1>>5)+k1
+        mov bx, v1
+        shr bx, 5  
+        add bx, k1 
+        
+        xor ax, bx  
+        
+        ;v0 += ((v1<<4) + k0) ^ (v1 + sum) ^ ((v1>>5) + k1)
+        add v0, ax 
+
+        ;(v0<<4)+k2
+        mov ax, v0
+        shl ax, 4
+        add ax, k2 
+        
+        ;v0+sum
+        mov bx, v0
+        add bx, sum 
+        
+        xor ax, bx
+        
+        ;(v0>>5) + k3
+        mov bx, v0
+        shr bx, 5  
+        add bx, k3
+        
+        xor ax, bx  
+        ;v1 += ((v0<<4) + k2) ^ (v0 + sum) ^ ((v0>>5) + k3)
+        add v1, ax 
+
     loop encryptLoop
-    mov eax, v0
-    mov [values] , eax
-    mov eax, v1
-    mov [values+4] , eax
+
+    ;values[0] = v0
+    mov ax, v0
+    CALL PRINT
+    mov [v] , ax
+    
+    ;new line
+    mov ah, 09
+    mov dx, offset linefeed
+    int 21h
+    
+
+    ;values[1] = v1
+    mov ax, v1
+    CALL PRINT
+    mov [v+2] , ax
+    
+    ;new line
+    mov ah, 09
+    mov dx, offset linefeed
+    int 21h
 
     ret
-enc ENDP
+
+encrypt ENDP
+
 ;decrybtion function
 MOV ESI, OFFSET ENC_string     ; ESI is pointing at the beginig of the encrypted message
 MOV EDX, OFFSET ENC_string	; EDX = Begining of ENC_string
