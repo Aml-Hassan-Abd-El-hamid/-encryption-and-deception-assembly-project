@@ -228,3 +228,6 @@ PRINT PROC
 exit:
 ret
 PRINT ENDP
+END main
+.EXIT
+END
