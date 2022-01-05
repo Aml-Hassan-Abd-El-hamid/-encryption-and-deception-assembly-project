@@ -1,24 +1,17 @@
-.DATA
+..DATA
 
-string DWORD 
-ENC_string DWORD 
-DELTA DWORD 9e3779b9H
-SUM DWORD 0
+sum dw 0
+v dw 2 DUP(0)
+v0 dw 10325
+v1 dw 20123
+delta dw 0130h
+;k dw 4 DUP(0),0
+k0 dw 1
+k1 dw 2
+k2 dw 3
+k3 dw 4
 
-KEY_0 DWORD 20   ; Key
-KEY_1 DWORD 3
-KEY_2 DWORD 50
-KEY_3 DWORD 100
-sum dd 0
-values dd 2 DUP(0)
-v0 dd ?
-v1 dd ?
-delta dd 9e3779b9h ;constant
-key dd 4 DUP(0)
-
-
-
-turn db 8 DUP(0),0
+linefeed db 13, 10, "$"
 
 .CODE
 
