@@ -14,6 +14,59 @@ k3 dw 4
 linefeed db 13, 10, "$"
 
 .CODE
+main PROC
+         MOV AX,@DATA
+         MOV DS,AX
+         
+         ;Print initial value in v0
+         mov ax,v0
+         CALL PRINT
+         
+         ;new line
+         mov ah, 09
+         mov dx, offset linefeed
+         int 21h
+         
+         ;Print initial value in v1
+         mov ax,v1
+         CALL PRINT
+         
+         ;new line
+         mov ah, 09
+         mov dx, offset linefeed
+         int 21h
+         
+         
+         ;Do encryption for (v0 & v1)
+         CALL encrypt
+         
+         ;new line
+         mov ah, 09
+         mov dx, offset linefeed
+         int 21h 
+         
+         ;Do encryption for (v0 & v1)
+         CALL decrypt
+         
+         ;new line
+         mov ah, 09
+         mov dx, offset linefeed
+         int 21h
+         
+         
+         ;interrupt to exit			
+	     MOV AH,4CH
+	     INT 21H
+
+            
+          
+            
+            
+            
+            
+            
+main ENDP
+
 
 encrypt PROC
     
