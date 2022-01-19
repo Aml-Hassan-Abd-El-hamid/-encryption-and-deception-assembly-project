@@ -1,3 +1,3 @@
 # Encryption-and-deception-assembly-project
- encryption and deception program using MIPS assembly 
+ encryption and deception program using 8086 assembly 
  
